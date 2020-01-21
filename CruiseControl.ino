@@ -1,3 +1,4 @@
+//SPChip
 #define NINEBOT_PORT Serial1   // Порт подключения к самокату
 #define ESC 0x20               // Контролер
 #define BLE 0x21               // Приборка с блютус

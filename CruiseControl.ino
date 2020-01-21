@@ -5,7 +5,7 @@
 #define BMS 0x22               // Контролер батареи
 #define IOT 0x3D               // Приложение ? Интернет вещей?
 #define APP 0x3E               // Приложение
-#define timeoutQuery 100       // пауза между запросами, мс                                     
+#define timeoutQuery 25       // пауза между запросами, мс                                     
 
 byte c;                                                             // переменная для хранения очередного байта из порта
 byte state = 0;                                                     // переменная состояния 0 - ожидание заголовка, 1- поиск второй части заголовка, 2- заполнения массива данными из буфера, 3- вывод результата
@@ -17,6 +17,7 @@ const byte req2[] = {0x5A, 0xA5, 0x01, 0x3E, 0x22, 0x01, 0x40, 0x10, 0x4D, 0xFF}
 const byte req3[] = {0x5A, 0xA5, 0x01, 0x3E, 0x22, 0x01, 0x48, 0x10, 0x45, 0xFF};    //indexQuery 3 батарея: последние 2 банки
 long timerQuery;        // таймер для запроса
 bool newDataFlag = 0;   // новые данные о скорости (для отрисовки на дисплее)
+long timeloop;
 
 int currentSpeed;       //текущая скорость
 int averageSpeed;       //средняя скорость
@@ -43,7 +44,10 @@ void setup() {
 }
 
 void loop() {
-  ReceivingData();
+  timeloop = micros();
+  ReceivingData();  
+  timeloop = micros() - timeloop;
+   //Serial.println(timeloop);
 }
 
 
@@ -63,7 +67,10 @@ void Unpack() {                 // процедура распаковки па�
                 case 0xB0:
                   currentSpeed = (data[18] << 8) | data[17];    // текущая скорость, x10 км/ч
                   averageSpeed = (data[20] << 8) | data[19];    // средняя скорость, x10 км/ч
-                  totalMileage = data[24] << 24 | data[23] << 16 | data[22] << 8 | data[21];  // общий пробег, м
+                  for (int i = 24; i > 20; i--) {               // общий пробег, м
+                    totalMileage <<= 8;
+                    totalMileage |= data[i];
+                  }
                   currentMileage = (data[26] << 8) | data[25];  // текущий пробег, м
                   ridingTime = (data[28] << 8) | data[27];      // время вождения, с
                   escTemp = (data[30] << 8) | data[29];         // температура контроллера, x10 град. цельсия
@@ -71,7 +78,7 @@ void Unpack() {                 // процедура распаковки па�
                     maxSpeed = currentSpeed;
                   }
                   newDataFlag = 1;                              // поднимаем флаг новых данных
-                  PrintPack();                                  // выводим пакет
+                  //PrintPack();                                  // выводим пакет
                   break;
               }
               break;
@@ -135,11 +142,13 @@ void Query(byte indexQuery) {        //процедура отправки за�
 
 
 void ReceivingData() {                                        //процедура получения данных
-  static byte indexQuery;
-  if (millis() - timerQuery > timeoutQuery ) {    
-    Query(indexQuery);                                        // отправляем 4 запроса по кругу
-    indexQuery++;
-    if (indexQuery>3) {indexQuery=0;}
+  static byte indexQuery1;
+  if (millis() - timerQuery > timeoutQuery ) {
+    Query(indexQuery1);                                        // отправляем 4 запроса по кругу
+    indexQuery1++;
+    if (indexQuery1 > 3) {
+      indexQuery1 = 0;
+    }
     timerQuery = millis();
   }
   if (NINEBOT_PORT.available()) {                                  // если в порту есть данные

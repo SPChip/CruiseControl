@@ -14,11 +14,13 @@ byte data[200] = {0};                                               // масс�
 const byte req0[] = {0x5A, 0xA5, 0x01, 0x3E, 0x20, 0x01, 0xB0, 0x20, 0xCF, 0xFE};    //indexQuery 0 скорость, время, пробег и т.д.
 const byte req1[] = {0x5A, 0xA5, 0x01, 0x3E, 0x22, 0x01, 0x31, 0x0A, 0x62, 0xFF};    //indexQuery 1 батарея: напряж ток % емк
 const byte req2[] = {0x5A, 0xA5, 0x01, 0x3E, 0x22, 0x01, 0x40, 0x10, 0x4D, 0xFF};    //indexQuery 2 батарея: первые 8 банок
-const byte req3[] = {0x5A, 0xA5, 0x01, 0x3E, 0x22, 0x01, 0x48, 0x10, 0x45, 0xFF};    //indexQuery 3 батарея: последние 2 банки
+const byte req3[] = {0x5A, 0xA5, 0x01, 0x3E, 0x22, 0x01, 0x40, 0x14, 0x49, 0xFF};
+//const byte req3[] = {0x5A, 0xA5, 0x01, 0x3E, 0x22, 0x01, 0x48, 0x10, 0x45, 0xFF};    //indexQuery 3 батарея: последние 2 банки
 long timerQuery;        // таймер для запроса
 bool newDataSpeedFlag = 0;   // новые данные о скорости (для отрисовки на дисплее)  скорость и др
 bool newDataBatFlag = 0;   // новые данные о скорости (для отрисовки на дисплее)   батарея
 long timeloop;
+byte j; 
 
 int currentSpeed;       //текущая скорость
 int averageSpeed;       //средняя скорость
@@ -132,13 +134,19 @@ void Unpack() {                 // процедура распаковки па�
                   inBatVoltage = (data[14] << 8) | data[13];       // напряжение внутренней батареи, /100 В
                   newDataBatFlag = 1;                              // поднимаем флаг новых данных
                   break;
+                  
                 case 0x40:
-                  int j = 8;
-                  for (int i = 0; i < 8; i++) {
+                  //PrintPack();
+                  j = 8;                
+                  for (int i = 0; i < 10; i++) {
                     inBatCell[i] = (data[j] << 8) | data[j - 1];     // напряжение на банках внутренней батареи (первые 8 банок) /1000 В
                     j += 2;
+                    
+                    Serial.print(inBatCell[i]);
+                    Serial.print("  ");
                   }
                   newDataBatFlag = 1;                              // поднимаем флаг новых данных
+                  Serial.println();
                 case 0x48:
                   int j = 8;
                   for (int i = 8; i < 10; i++) {
@@ -171,13 +179,13 @@ void Query(byte indexQuery) {        //процедура отправки за�
   UCSR1B &= ~_BV(RXEN1);
   switch (indexQuery) {
     case 0:
-      NINEBOT_PORT.write(req0, sizeof(req0));
+      NINEBOT_PORT.write(req3, sizeof(req0));
       break;
     case 1:
-      NINEBOT_PORT.write(req1, sizeof(req0));
+      NINEBOT_PORT.write(req3, sizeof(req0));
       break;
     case 2:
-      NINEBOT_PORT.write(req2, sizeof(req0));
+      NINEBOT_PORT.write(req3, sizeof(req0));
       break;
     case 3:
       NINEBOT_PORT.write(req3, sizeof(req0));

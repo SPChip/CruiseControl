@@ -1,6 +1,8 @@
 //SPChip
-#include <LCD5110_Basic.h>
+#include <LCD5110_Graph.h>
+#include "GyverButton.h"  // Библиотека для кнопки
 
+#define BTN_PIN1 10     // кнопка1 подключена сюда (BTN_PIN --- КНОПКА --- GND)
 #define NINEBOT_PORT Serial1   // Порт подключения к самокату
 #define ESC 0x20               // Контролер
 #define BLE 0x21               // Приборка с блютус
@@ -9,6 +11,7 @@
 #define APP 0x3E               // Приложение
 #define TIMEOUT_QUERY 25        // пауза между запросами, мс 
 
+GButton btn1(BTN_PIN1, HIGH_PULL, NORM_OPEN); // настраиваем кнопки
 LCD5110 LCD(3, 4, 5, 6, 7); // Инициализация библиотеки с указанием пинов подключения к Arduino
 extern uint8_t SmallFont[]; //объявление внешнего массива символов
 extern uint8_t MediumNumbers[]; //объявление внешнего массива символов
@@ -56,21 +59,29 @@ unsigned int exBatVoltage;       // напряжение  внешней бат�
 unsigned int inBatCell[10];      // напряжение на банках внутренней батареи
 unsigned int exBatCell[10];      // напряжение на банках внешней батареи
 
+byte contrast = 58;
+
 void setup() {
   Serial.begin(115200);                                            // включаем и настраиваем последовательный порт к компу (в мониторе порта поставить тоже 115200)
   NINEBOT_PORT.begin(115200);                                      // включаем и настраиваем последовательный порт к скутеру
-
   LCD.InitLCD(); // Инициализация дисплея
-  LCD.setContrast(60); // Установка значения контраста
-
-
+  LCD.setContrast(contrast); // Установка значения контраста
 
 }
 
 void loop() {
   timeloop = micros();
+  btn1.tick();                            // постоянно проверяем первую кнопку
+  if (btn1.isClick()) {                   // если кнопка 1 нажата переключаем режим отображения
+    contrast++;                               // переходим к следующему режиму
+    LCD.setContrast(contrast);
+    Serial.println(contrast);
+  }
   ReceivingData();
-  if (millis() - lcdtime > 250) {
+  if (millis() < 200) {
+    DisplayLogo();
+  }
+  else if (millis() - lcdtime > 1000) {
     if (newDataFlag) {
       Display1();
       newDataFlag = 0;
@@ -82,30 +93,68 @@ void loop() {
 }
 
 void Display1() {
-  int _batCharge = 100;
-  LCD.clrRow(1, 0, 34);
-  LCD.setFont(SmallFont); // Выбор шрифт под названием SmallFont"
-  LCD.print("OOOO", LEFT, 0);
-  LCD.print(123, 3, 28);
-  LCD.print("00:00", LEFT, 41);
-  LCD.print("00:00:00", RIGHT, 32);
-  LCD.print("000,00km", RIGHT, 41);
-  LCD.setFont(BigNumbers);
-  LCD.printNumI(358, RIGHT, 7);
+  int _batCharge = 11;
+  LCD.clrScr();
+  // значок зарядки
+  LCD.drawRect (0, 0, 21, 6);
+  LCD.drawRect (21, 2, 23, 4);
+  LCD.setPixel (23, 3);
+  LCD.clrPixel(21, 0);
+  LCD.clrPixel(21, 6);
+  for (int i = 2; i <= (batCharge + 4) / 5; i++) {
+    LCD.drawLine(i, 1, i, 6);
+  }
+  LCD.clrRect(1, 1, 20, 5);
+  //% зарядки
   LCD.setFont(SmallFont);
-  LCD.printNumI(_batCharge, LEFT, 8);
+  LCD.printNumI(batCharge, LEFT, 8);
   LCD.setFont(SmallFont);
-  if (_batCharge >= 100) {
+  if (batCharge >= 100) {
     LCD.print("%", 18, 8);
   }
-  if (_batCharge >= 10 && _batCharge < 100) {
+  if (batCharge >= 10 && batCharge < 100) {
     LCD.print("%", 12, 8);
   }
-  if (_batCharge < 10) {
+  if (batCharge < 10) {
     LCD.print("%", 6, 8);
   }
+  // секундомер
+  int XRidingTime = 0;
+  int YRidingTime = 40;
+  LCD.printNumF(int(millis() / 3600000), 0, XRidingTime, YRidingTime, ',', 2, '0');
+  LCD.print(":", XRidingTime + 12, YRidingTime);
+  LCD.printNumF(int((millis() % 3600000) / 60000), 0, XRidingTime + 18, YRidingTime, ',', 2, '0');
+  LCD.print(":", XRidingTime + 30, YRidingTime);
+  LCD.printNumF( int(((millis() % 3600000) % 60000) / 1000), 0, XRidingTime + 36, YRidingTime, ',', 2, '0');
+  //температура
+  LCD.printNumI(escTemp / 10, 31, 0, 2, ' ');
+  LCD.drawCircle(45, 1, 1);
+
+
+
+  LCD.setFont(SmallFont); // Выбор шрифт под названием SmallFont"
+  //LCD.print("OOOO", LEFT, 0);
+  LCD.print(123, 3, 28);
+  LCD.print("22:51", RIGHT, 0);
+  //LCD.print("00:00:00", RIGHT, 32);
+  LCD.print("00,00km", LEFT, 32);
+  LCD.setFont(BigNumbers);
+  LCD.printNumI(358, RIGHT, 7);
+
+  LCD.update();
+  LCD.clrScr();
 
   //LCD.printNumI(currentSpeed * 10, CENTER, 0);
+}
+
+void DisplayLogo() {
+  LCD.clrScr();
+  LCD.setFont(SmallFont);
+  LCD.print("NINEBOT", CENTER, 0);
+  LCD.print("CRUISE CONTROL", CENTER, 8);
+  LCD.print("SPChip", CENTER, 24);
+  LCD.print("ver 1.0", RIGHT, 40);
+  LCD.update();
 }
 
 

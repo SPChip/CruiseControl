@@ -7,31 +7,32 @@ void Display1() {
   for (int i = 93; i > 95 - (batCharge + 4) / 5; i--) {
     LCD.drawFastVLine(i, 2, 4, 1);
   }
+
   //% зарядки
   if (batCharge >= 100) {
     LCD.print(72, 10, 1, batCharge);
   }
-  if (batCharge >= 10 && batCharge < 100) {
+  else if (batCharge >= 10 && batCharge < 100) {
     LCD.print(78, 10, 1, batCharge);
   }
-  if (batCharge < 10) {
+  else (batCharge < 10) {
     LCD.print(84, 10, 1, batCharge);
   }
   LCD.print(91, 10, 1, "%");
 
   //температура
   LCD.print(40, 0, 1, escTemp / 10);
-  if (int(escTemp) / 10 <= -10) {
-    LCD.drawCircle(60, 1, 1, 1);
-  }
-  if (int(escTemp / 10) > -10 && int(escTemp / 10) < 0) {
-    LCD.drawCircle(54, 1, 1, 1);
-  }
-  if (int(escTemp / 10) >= 0 && int(escTemp / 10) < 10) {
-    LCD.drawCircle(48, 1, 1, 1);
-  }
   if (int(escTemp / 10) >= 10) {
     LCD.drawCircle(54, 1, 1, 1);
+  }
+  else if (int(escTemp / 10) >= 0 && int(escTemp / 10) < 10) {
+    LCD.drawCircle(48, 1, 1, 1);
+  }
+  else if (int(escTemp / 10) > -10 && int(escTemp / 10) < 0) {
+    LCD.drawCircle(54, 1, 1, 1);
+  }
+  else (int(escTemp) / 10 <= -10) {
+    LCD.drawCircle(60, 1, 1, 1);
   }
 
   //часы
@@ -90,44 +91,121 @@ void Display1() {
   LCD.Update();
 }
 
-void Display4() {
+void Display4() {                    // информация о батареях
   LCD.Clear_LCD();
+  // заголовок
   LCD.print(12, 0, 1, "Battery info");
   LCD.drawFastHLine(0, 10, 96, 1);
   LCD.print(30, 15, 1, "InBat ExBat");
 
+  // осталась емкость
   LCD.print(0, 28, 1, "Cap");
-  LCD.print(36, 28, 1, inBatCapacityLeft);
-  LCD.print(73, 28, 1, exBatCapacityLeft);
+  if (inBatCapacityLeft >= 1000) {
+    LCD.print(36, 28, 1, inBatCapacityLeft);
+  }
+  else if (inBatCapacityLeft >= 100 && inBatCapacityLeft < 1000) {
+    LCD.print(36, 28, 1, " ");
+    LCD.print(42, 28, 1, inBatCapacityLeft);
+  }
+  else if (inBatCapacityLeft >= 10 && inBatCapacityLeft < 100) {
+    LCD.print(36, 28, 1, "  ");
+    LCD.print(48, 28, 1, inBatCapacityLeft);
+  }
+  else (inBatCapacityLeft < 10) {
+    LCD.print(36, 28, 1, "   ");
+    LCD.print(54, 28, 1, inBatCapacityLeft);
+  }
 
 
+  if (exBatCapacityLeft >= 1000) {
+    LCD.print(73, 28, 1, exBatCapacityLeft);
+  }
+  else if (exBatCapacityLeft >= 100 && exBatCapacityLeft < 1000) {
+    LCD.print(73, 28, 1, " ");
+    LCD.print(79, 28, 1, exBatCapacityLeft);
+  }
+  else if (exBatCapacityLeft >= 10 && exBatCapacityLeft < 100) {
+    LCD.print(73, 28, 1, "  ");
+    LCD.print(85, 28, 1, exBatCapacityLeft);
+  }
+  else {
+    LCD.print(73, 28, 1, "   ");
+    LCD.print(91, 28, 1, exBatCapacityLeft);
+  }
+
+
+  // заряд
   LCD.print(0, 39, 1, "Chrg");
+
   if (inBatCharge >= 100) {
     LCD.print(36, 39, 1, inBatCharge);
   }
-  if (inBatCharge >= 10 && inBatCharge < 100) {
+  else if (inBatCharge >= 10 && inBatCharge < 100) {
     LCD.print(42, 39, 1, inBatCharge);
   }
-  if (inBatCharge < 10) {
+  else (inBatCharge < 10) {
     LCD.print(48, 39, 1, inBatCharge);
   }
+
   LCD.print(54, 39, 1, "%");
   if (exBatCharge >= 100) {
     LCD.print(72, 39, 1, exBatCharge);
   }
-  if (exBatCharge >= 10 && exBatCharge < 100) {
+  else if (exBatCharge >= 10 && exBatCharge < 100) {
     LCD.print(78, 39, 1, exBatCharge);
   }
-  if (exBatCharge < 10) {
+  else (exBatCharge < 10) {
     LCD.print(84, 39, 1, exBatCharge);
   }
   LCD.print(91, 39, 1, "%");
 
-
-
-
+  // ток
   LCD.print(0, 50, 1, "Cur");
+
+  if (inBatCurent  >= 1000) {
+    LCD.print(36, 50, 1, (inBatCurent % 10000) / 1000);
+  }
+  else {
+    LCD.print(36, 50, 1, " ";
+  }
+  LCD.print(42, 50, 1, (inBatCurent % 1000) / 100);
+  LCD.print(47, 50, 1, ",");
+  LCD.print(51, 50, 1, (inBatCurent % 100) / 10);
+  LCD.print(57, 50, 1, inBatCurent % 10);
+  LCD.print(63, 50, 1, "A");
+
+  if (exBatCurent  >= 1000) {
+    LCD.print(73, 50, 1, (exBatCurent % 10000) / 1000);
+  }
+  else {
+    LCD.print(73, 50, 1, " ";
+  }
+  LCD.print(79, 50, 1, (exBatCurent % 1000) / 100);
+  LCD.print(84, 50, 1, ",");
+  LCD.print(88, 50, 1, (exBatCurent % 100) / 10);
+  LCD.print(94, 50, 1, exBatCurent % 10);
+  LCD.print(100, 50, 1, "A");
+
+
+
+
+  // напряжение
   LCD.print(0, 61, 1, "Volt");
+
+  LCD.print(36, 61, 1, (inBatVoltage % 10000) / 1000);
+  LCD.print(42, 61, 1, (inBatVoltage % 1000) / 100);
+  LCD.print(47, 61, 1, ",");
+  LCD.print(51, 61, 1, (inBatVoltage % 100) / 10);
+  LCD.print(57, 61, 1, inBatVoltage % 10);
+  LCD.print(63, 61, 1, "V");
+
+  LCD.print(73, 61, 1, (exBatVoltage % 10000) / 1000);
+  LCD.print(79, 61, 1, (exBatVoltage % 1000) / 100);
+  LCD.print(84, 61, 1, ",");
+  LCD.print(88, 61, 1, (exBatVoltage % 100) / 10);
+  LCD.print(94, 61, 1, exBatVoltage % 10);
+  LCD.print(100, 61, 1, "V");
+
   LCD.Update();
 }
 
@@ -151,7 +229,3 @@ void DisplayLogo() {
   LCD.print(1, 60, 1, "ver 1.0");
   LCD.Update();
 }
-
-
-
-

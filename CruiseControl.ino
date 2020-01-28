@@ -10,7 +10,7 @@ LCD1202 LCD(8, 7, 6, 5);  // RST, CS, MOSI, SCK
 
 byte curs = 0;                                                      // текущий элемент массива данных, количество данных
 byte data[200] = {0};                                               // массив для данных, нулевой элемент = 0
-byte dysplayMode = 4;
+byte dysplayMode = 1;
 bool passiveMode = 0;
 
 bool newDataFlag = 1;   // новые данные о скорости (для отрисовки на дисплее)  скорость и др
@@ -26,7 +26,7 @@ int maxSpeed;           //максимальная скорость
 unsigned long totalMileage;      //общий пробег
 unsigned long currentMileage;    //текущий пробег
 unsigned int ridingTime;         //время вождения
-unsigned int escTemp;            // температура контроллера
+int escTemp;            // температура контроллера
 unsigned int inBatCapacityLeft;  // остаточная емкость внутренней батареи
 unsigned int exBatCapacityLeft;  // остаточная емкость внешней батареи
 unsigned int inBatCharge;        // заряд внутренней батареи
@@ -35,6 +35,8 @@ int inBatCurent;        // ток внутренней батареи
 int exBatCurent;        // ток внешней батареи
 unsigned int inBatVoltage;       // напряжение внутренней батареи
 unsigned int exBatVoltage;       // напряжение  внешней батареи
+int inBatTemp;                   // напряжениетемпература внутренней батареи
+int exBatTemp;                   // температура  внешней батареи
 unsigned int inBatCell[10];      // напряжение на банках внутренней батареи
 unsigned int exBatCell[10];      // напряжение на банках внешней батареи
 
@@ -47,6 +49,7 @@ void setup() {
 }
 
 void loop() {
+ 
   timeloop = micros();
   btn1.tick();                            // постоянно проверяем первую кнопку
   if (btn1.isClick()) {                   // если кнопка 1 нажата переключаем режим отображения
@@ -58,11 +61,32 @@ void loop() {
   }
   else if (millis() - lcdtime > 1000) {
     if (newDataFlag) {
-      Display4();
+      switch (dysplayMode) {
+        case 0:
+            break;
+        case 1:
+            Display1();
+          break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            Display4();
+          break;
+        case 5:
+            Display5();
+          break;
+        case 6:
+            Display6();
+          break;
+      }
       newDataFlag = 0;
       lcdtime = millis();
     }
   }
   timeloop = micros() - timeloop;
-  // Serial.println(timeloop);
+   //Serial.println(timeloop);
+
+
 }

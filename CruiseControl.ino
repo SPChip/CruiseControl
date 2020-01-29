@@ -10,7 +10,7 @@ LCD1202 LCD(8, 7, 6, 5);  // RST, CS, MOSI, SCK
 
 byte curs = 0;                                                      // текущий элемент массива данных, количество данных
 byte data[200] = {0};                                               // массив для данных, нулевой элемент = 0
-byte dysplayMode = 1;
+byte dysplayMode = 3;
 bool passiveMode = 0;
 
 bool newDataFlag = 1;   // новые данные о скорости (для отрисовки на дисплее)  скорость и др
@@ -70,6 +70,7 @@ void loop() {
         case 2:
             break;
         case 3:
+            Display3();
             break;
         case 4:
             Display4();

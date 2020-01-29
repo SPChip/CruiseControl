@@ -1,4 +1,43 @@
 
+void Display3() {
+  LCD.Clear_LCD();
+  LCD.print(20, 0, 1, "Trip info");
+  LCD.drawFastHLine(0, 8, 96, 1);
+  LCD.print(0, 13, 1, "Time");
+  LCD.print(0, 21, 1, "Distance");
+  LCD.print(0, 29, 1, "MaxSpeed");
+  LCD.print(0, 37, 1, "AverSpeed");
+  LCD.print(0,45, 1, "UsedBat");
+  LCD.print(0, 53, 1, "RemDist");
+  LCD.print(0, 61, 1, "Total");
+
+
+
+
+
+
+
+
+
+
+  LCD.Update();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void Display5() {
   LCD.Clear_LCD();
   LCD.print(15, 0, 1, "INBAT CELLs");
@@ -115,23 +154,23 @@ void Display1() {
   LCD.simb16x32(18, 15, 1, 3);
   LCD.simb16x32(36, 15, 1, 4);
   LCD.simb16x32(54, 15, 1, 2);
- 
-  
-  
-  
-  
+
+
+
+
+
   LCD.print(75, 33, 1, "Втч");
   LCD.print(75, 40, 1, "/км");
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
+
   //линии
   LCD.drawFastHLine(0, 50, 96, 1);
   LCD.drawFastVLine(45, 50, 18, 1);
@@ -293,12 +332,12 @@ void Display4() {                    // информация о батареях
   LCD.print(0, 51, 1, "Volt");
 
   LCD.print(28, 51, 1, inBatVoltage / 100);
-  LCD.print(39, 51, 1, ",");  
+  LCD.print(39, 51, 1, ",");
   LCD.print(43, 51, 1, inBatVoltage % 100);
   LCD.print(55, 51, 1, "V");
-  LCD.print(64, 51, 1, exBatVoltage /100);  
+  LCD.print(64, 51, 1, exBatVoltage / 100);
   LCD.print(75, 51, 1, ",");
-  LCD.print(79, 51, 1, exBatVoltage % 100);  
+  LCD.print(79, 51, 1, exBatVoltage % 100);
   LCD.print(91, 51, 1, "V");
 
 

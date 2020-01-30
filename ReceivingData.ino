@@ -4,83 +4,157 @@
 #define EXBMS 0x23             // Контролер внешней батареи
 #define IOT 0x3D               // Приложение ? Интернет вещей?
 #define APP 0x3E               // Приложение
-#define TIMEOUT_QUERY 25       // пауза между запросами, мс 
 
-const byte REQ_SPEED[] = {0x5A, 0xA5, 0x01, 0x3E, 0x20, 0x01, 0x26, 0x02, 0x77, 0xFF}; // запрос скорости
-const byte REQ_CURRENT[] = {0x5A, 0xA5, 0x01, 0x3E, 0x20, 0x01, 0x53, 0x02, 0x4A, 0xFF}; // запрос тока фазы (регистр 53 ESC)
-const byte REQ_POWER[] = {0x5A, 0xA5, 0x01, 0x3E, 0x20, 0x01, 0xBD, 0x02, 0xE0, 0xFE}; // запрос мощности (регистр BD ESC)
-const byte REQ_TRIP[] = {0x5A, 0xA5, 0x01, 0x3E, 0x20, 0x01, 0xB4, 0x10, 0xDB, 0xFE}; // запрос заряд %, скорость, ср. скорость, общий пробег, пробег за поездку, время с включения, температура контроллера
-const byte REQ_INBAT[] = {0x5A, 0xA5, 0x01, 0x3E, 0x22, 0x01, 0x31, 0x0A, 0x62, 0xFF}; // запрос к внутренней BMS  емкость, %, ток, напряжение, темп
-const byte REQ_EXBAT[] = {0x5A, 0xA5, 0x01, 0x3E, 0x23, 0x01, 0x31, 0x0A, 0x61, 0xFF}; // запрос к внешней BMS  емкость, %, ток, напряжение, темп
-const byte REQ_INCELL[] = {0x5A, 0xA5, 0x01, 0x3E, 0x22, 0x01, 0x40, 0x14, 0x49, 0xFF}; // запрос к внутренней BMS банки внутренней батареи
-const byte REQ_EXCELL[] = {0x5A, 0xA5, 0x01, 0x3E, 0x23, 0x01, 0x40, 0x14, 0x48, 0xFF}; // запрос к внешней BMS банки внутренней батареи
 
-void Query() {                             // процедура отправки запроса
-  static unsigned long timerReq;          // таймер для запроса
-  static byte reqMode;
-  static byte reqCounter;
-  static bool reqBat;     // для чередования запрса к внешней и внутренней батарее
-  byte REQ[10];
-  if (!passiveMode && dysplayMode != 0) {              // если не включен пассивный режим
-    if (millis() - timerReq > TIMEOUT_QUERY) {
-      if (reqMode > 2) {           // отправляем покругу 3 пакета
-        reqMode = 0;
+const byte REQ_SPEED[] PROGMEM = {0x5A, 0xA5, 0x01, 0x3E, 0x20, 0x01, 0x26, 0x02, 0x77, 0xFF}; // запрос скорости
+const byte REQ_CURRENT[]PROGMEM = {0x5A, 0xA5, 0x01, 0x3E, 0x20, 0x01, 0x53, 0x02, 0x4A, 0xFF}; // запрос тока фазы (регистр 53 ESC)
+const byte REQ_POWER[] PROGMEM = {0x5A, 0xA5, 0x01, 0x3E, 0x20, 0x01, 0xBD, 0x02, 0xE0, 0xFE}; // запрос мощности (регистр BD ESC)
+const byte REQ_TRIP[] PROGMEM = {0x5A, 0xA5, 0x01, 0x3E, 0x20, 0x01, 0xB4, 0x10, 0xDB, 0xFE}; // запрос заряд %, скорость, ср. скорость, общий пробег, пробег за поездку, время с включения, температура контроллера
+const byte REQ_INBAT[] PROGMEM = {0x5A, 0xA5, 0x01, 0x3E, 0x22, 0x01, 0x31, 0x0A, 0x62, 0xFF}; // запрос к внутренней BMS  емкость, %, ток, напряжение, темп
+const byte REQ_EXBAT[] PROGMEM = {0x5A, 0xA5, 0x01, 0x3E, 0x23, 0x01, 0x31, 0x0A, 0x61, 0xFF}; // запрос к внешней BMS  емкость, %, ток, напряжение, темп
+const byte REQ_INCELL[]PROGMEM = {0x5A, 0xA5, 0x01, 0x3E, 0x22, 0x01, 0x40, 0x14, 0x49, 0xFF}; // запрос к внутренней BMS банки внутренней батареи
+const byte REQ_EXCELL[] PROGMEM = {0x5A, 0xA5, 0x01, 0x3E, 0x23, 0x01, 0x40, 0x14, 0x48, 0xFF}; // запрос к внешней BMS банки внутренней батареи
+
+void Query() {                                         // процедура отправки запроса
+  static unsigned long timerReq;                       // таймер для запроса
+  static byte reqCounter;                              // счетчик запросов для чередования
+  byte REQ[10];                                        // буферный массив
+  if (!passiveMode && dysplayMode != 0) {              // если не включен пассивный режим или режим установок
+    if (millis() - timerReq > TIMEOUT_QUERY) {         // если прошло время > TIMEOUT_QUERY
+      switch (dysplayMode) {
+        case 1:                                        // 1 экран данные о поездке + ток
+          switch (reqCounter) {
+            case 0:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_SPEED[i]);
+              }
+              reqCounter++;
+              break;
+            case 1:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_CURRENT[i]);
+              }
+              reqCounter++;
+              break;
+            case 2:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_TRIP[i]);
+              }
+              reqCounter++;
+              break;
+          }
+          if (reqCounter >= 3) reqCounter = 0;
+          break;
+        case 2:                                        // 2 экран данные о поездке + расход
+          switch (reqCounter) {
+            case 0:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_SPEED[i]);
+              }
+              reqCounter++;
+              break;
+            case 1:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_POWER[i]);
+              }
+              reqCounter++;
+              break;
+            case 2:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_TRIP[i]);
+              }
+              reqCounter++;
+              break;
+          }
+          if (reqCounter >= 3) reqCounter = 0;
+          break;
+        case 3:                                        // 3 экран полные данные о поездке: время в пути, пройденный путь, максимальная скорость, средняя скорость, использовано % батареи, использовано мАч, запас хода,  общий пробег
+          switch (reqCounter) {
+            case 0:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_SPEED[i]);
+              }
+              reqCounter++;
+              break;
+            case 1:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_TRIP[i]);
+              }
+              reqCounter++;
+              break;
+            case 2:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_INBAT[i]);
+              }
+              reqCounter++;
+              break;
+            case 3:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_EXBAT[i]);
+              }
+              reqCounter++;
+              break;
+          }
+          if (reqCounter >= 4) reqCounter = 0;
+          break;
+        case 4:                                           // 4 экран данные о батареях
+          switch (reqCounter) {
+            case 0:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_SPEED[i]);
+              }
+              reqCounter++;
+              break;
+            case 1:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_INBAT[i]);
+              }
+              reqCounter++;
+              break;
+            case 2:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_EXBAT[i]);
+              }
+              reqCounter++;
+              break;
+          }
+          if (reqCounter >= 3) reqCounter = 0;
+          break;
+        case 5:                                           // 5 экран данные о банках внутренней батареи
+          switch (reqCounter) {
+            case 0:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_SPEED[i]);
+              }
+              reqCounter++;
+              break;
+            case 1:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_INCELL[i]);
+              }
+              reqCounter++;
+              break;
+          }
+          if (reqCounter >= 2) reqCounter = 0;
+          break;
+        case 6:                                           // 6 экран данные о банках внешней батареи
+          switch (reqCounter) {
+            case 0:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_SPEED[i]);
+              }
+              reqCounter++;
+              break;
+            case 1:
+              for (int i = 0; i < 10; i++) {
+                REQ[i] = pgm_read_byte(&REQ_INCELL[i]);
+              }
+              reqCounter++;
+              break;
+          }
+          if (reqCounter >= 2) reqCounter = 0;
+          break;
       }
-      if (reqCounter > 6) {        // если отправлено 10 пакетов
-        switch (dysplayMode) {      // отправляем пакет в соответствии dysplayMode
-          case 1:                   // 1 экран данные о поездке + расход
-          case 2:                   // 2 экран данные о поездке + ток
-          case 3:                   // 3 экран подробные данные о поездке
-            reqMode = 3;
-            reqCounter = 0;
-            break;
-          case 4:                   // 4 экран инфо о батареях обоих
-            if (reqBat) {
-              reqMode = 4;
-              reqBat = 0;
-            }
-            else {
-              reqMode = 5;
-              reqBat = 1;
-            } break;
-          case 5:                   // 5 экран банки внутренние
-            reqMode = 6;
-            reqCounter = 0;
-            break;
-          case 6:                   // 6 экран банки внешние
-            reqMode = 7;
-            reqCounter = 0;
-            break;
-        }
-      }
-      switch (reqMode) {
-        case 0:
-          memcpy (REQ, REQ_SPEED, 10);
-          break;
-        case 1:
-          memcpy (REQ, REQ_CURRENT, 10);
-          break;
-        case 2:
-          memcpy (REQ, REQ_POWER, 10);
-          break;
-        case 3:
-          memcpy (REQ, REQ_TRIP, 10);
-          break;
-        case 4:
-          memcpy (REQ, REQ_INBAT, 10);
-          break;
-        case 5:
-          memcpy (REQ, REQ_EXBAT, 10);
-          break;
-        case 6:
-          memcpy (REQ, REQ_INCELL, 10);
-          break;
-        case 7:
-          memcpy (REQ, REQ_EXCELL, 10);
-          break;
-      }
-      reqMode++;
-      reqCounter++;
       timerReq = millis();
       UCSR1B &= ~_BV(RXEN1);            // здесь поменять на UCSR0B &= ~_BV(RXEN0);
       NINEBOT_PORT.write(REQ, 10);
@@ -88,7 +162,6 @@ void Query() {                             // процедура отправк�
     }
   }
 }
-
 
 
 void Unpack() {                 // процедура распаковки пакета
@@ -106,10 +179,11 @@ void Unpack() {                 // процедура распаковки па�
               switch (data[6]) {
                 case 0x26:
                   currentSpeed = (data[8] << 8) | data[7];    // текущая скорость, x10 км/ч
+                  maxSpeed = max(currentSpeed, maxSpeed);     // вычисляем максимальную скорость, x10 км/ч
                   newDataFlag = 1;
                   break;
                 case 0xB4:
-                  batCharge = (data[8] << 8) | data[7];    // средняя скорость, x10 км/ч
+                  batCharge = (data[8] << 8) | data[7];         // заряд батареи
                   averageSpeed = (data[12] << 8) | data[11];    // средняя скорость, x10 км/ч
                   for (int i = 16; i > 12; i--) {               // общий пробег, м
                     totalMileage <<= 8;
@@ -129,7 +203,6 @@ void Unpack() {                 // процедура распаковки па�
     case BLE:
       switch (data[4]) {
         case ESC:
-          //Query(0);
           break;
         case BMS:
           break;
@@ -148,13 +221,13 @@ void Unpack() {                 // процедура распаковки па�
           switch (data[5]) {
             case 0x04:
               switch (data[6]) {
-                case 0x31:              
+                case 0x31:
                   inBatCapacityLeft = (data[8] << 8) | data[7];    // остаточная емкость внутренней батареи, мА*ч
                   inBatCharge = (data[10] << 8) | data[9];         // заряд внутренней батареи, %
                   inBatCurent = (data[12] << 8) | data[11];        // ток внутренней батареи, x10 мА
                   inBatVoltage = (data[14] << 8) | data[13];       // напряжение внутренней батареи, /100 В
-                  inBatTemp = max(data[15], data[16]) - 20;           // максимальная из присылаемых температур
-                  newDataFlag = 1;                              // поднимаем флаг новых данных о батарее
+                  inBatTemp = max(data[15], data[16]) - 20;        // максимальная из присылаемых температур
+                  newDataFlag = 1;                                 // поднимаем флаг новых данных о батарее
                   break;
                 case 0x40:
                   byte cellByte = 8;
@@ -214,14 +287,10 @@ void Unpack() {                 // процедура распаковки па�
   }
 }
 
-
-
-
-
-void ReceivingData() {                                        //процедура получения данных
+void ReceivingData() {                                                //процедура получения данных
   static byte readByte;                                                      // переменная для хранения очередного байта из порта
   static byte state = 0;                                                     // переменная состояния 0 - ожидание заголовка, 1- поиск второй части заголовка, 2- заполнения массива данными из буфера, 3- вывод результата
-  Query();                                        // отправляем запрос
+  Query();                                                        // отправляем запрос
 
   while (NINEBOT_PORT.available()) {                               // если в порту есть данные
     readByte = NINEBOT_PORT.read();                                       // читаем из порта байт и он стирается из буфера

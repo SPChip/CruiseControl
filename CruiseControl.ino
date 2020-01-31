@@ -2,10 +2,11 @@
 #include "lcd1202.h"      // Библиотека для дисплея
 #include "GyverButton.h"  // Библиотека для кнопки
 #include <EEPROM.h>       // Библиотека для eeprom
+//#include "microDS3231.h"  // Библиотека для часов реального времени
 
 #define BTN_PIN1 10            // кнопка1 подключена сюда (BTN_PIN --- КНОПКА --- GND)
 #define BL_LCD_PIN 4
-#define NINEBOT_PORT Serial1   // Порт подключения к самокату
+#define NINEBOT_PORT Serial   // Порт подключения к самокату
 #define TIMEOUT_QUERY 50       // пауза между запросами, мс 
 #define TIMEOUT_LCD 1000       // пауза между обновлениями экрана
 
@@ -15,7 +16,7 @@
 
 GButton btn1(BTN_PIN1, HIGH_PULL, NORM_OPEN);        // настраиваем кнопку 1
 LCD1202 LCD(8, 7, 6, 5);  // RST, CS, MOSI, SCK      // подключаем дисплей
-
+//MicroDS3231 rtc;   // создаем дисплей, подключен к A4, A5
 
 byte curs = 0;                                                      // текущий элемент массива данных, количество данных, потом перенести в ReceivingData
 byte data[200] = {0};                                               // массив для принимаемых пакетов, нулевой элемент = 0

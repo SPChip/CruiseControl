@@ -30,7 +30,7 @@ void Display1() {
   }
   else  {
     LCD.drawCircle(60, 1, 1, 1);
-    }
+  }
   //часы
   LCD.print(0, 0, 1, "12:43");
   //расход
@@ -83,19 +83,128 @@ void Display1() {
 
 
 
+
+
+
+
 void Display3() {
+  //заголовок
   LCD.Clear_LCD();
   LCD.print(20, 0, 1, "Trip info");
   LCD.drawFastHLine(0, 8, 96, 1);
+
+  //время
   LCD.print(0, 13, 1, "Time");
+  if (int(millis() / 3600000) <= 9) {          //часы
+    LCD.print(49, 13, 1, "0");
+    LCD.print(55, 13, 1, int(millis() / 3600000));
+  }
+  else {
+    LCD.print(49, 13, 1, int(millis() / 3600000));
+  }
+  LCD.print(61, 13, 1, ":");
+
+  if (int((millis() % 3600000) / 60000) <= 9) {          //минуты
+    LCD.print(67, 13, 1, "0");
+    LCD.print(73, 13, 1, int((millis() % 3600000) / 60000));
+  }
+  else {
+    LCD.print(67, 13, 1, int((millis() % 3600000) / 60000));
+  }
+  LCD.print(79, 13, 1, ":");
+
+  if (int(((millis() % 3600000) % 60000) / 1000) <= 9) {          //секунды
+    LCD.print(85, 13, 1, "0");
+    LCD.print(91, 13, 1, int(((millis() % 3600000) % 60000) / 1000));
+  }
+  else {
+    LCD.print(85, 13, 1, int(((millis() % 3600000) % 60000) / 1000));
+  }
+  LCD.Update();
+
+  // пробег за поездку
   LCD.print(0, 21, 1, "Distance");
+  LCD.print(64, 21, 1, (currentMileage % 10000) / 1000);
+  LCD.print(70, 21, 1, (currentMileage % 1000) / 100);
+  LCD.print(75, 21, 1, ",");
+  LCD.print(79, 21, 1, (currentMileage % 100) / 10);
+  LCD.print(85, 21, 1, currentMileage % 10);
+  LCD.print(91, 21, 1, "км");
+
+  // максимальная скорость
   LCD.print(0, 29, 1, "MaxSpeed");
+  if ((maxSpeed % 1000) / 100 > 0) {
+    LCD.print(58, 29, 1, (maxSpeed % 1000) / 100);
+  }
+  else {
+    LCD.print(58, 29, 1, " ");
+  }
+  LCD.print(64, 29, 1, (maxSpeed % 100) / 10);
+  LCD.print(69, 29, 1, ",");
+  LCD.print(73, 29, 1, maxSpeed % 10);
+  LCD.print(79, 29, 1, "км/ч");
+
+  // средняя скорость
   LCD.print(0, 37, 1, "AverSpeed");
+  if ((averageSpeed % 1000) / 100 > 0) {
+    LCD.print(58, 37, 1, (averageSpeed % 1000) / 100);
+  }
+  else {
+    LCD.print(58, 37, 1, " ");
+  }
+  LCD.print(64, 37, 1, (averageSpeed % 100) / 10);
+  LCD.print(69, 37, 1, ",");
+  LCD.print(73, 37, 1, averageSpeed % 10);
+  LCD.print(79, 37, 1, "км/ч");
+
+  // использовано батареи
   LCD.print(0, 45, 1, "UsedBat");
+  LCD.print(48, 45, 1, startBatCharge - batCharge);
+  if (startBatCharge - batCharge > 9) {
+    LCD.print(60, 45, 1, "%");
+  }
+  else {
+    LCD.print(54, 45, 1, "%");
+  }
+  LCD.print(79, 45, 1, startBatCapacityLeft - inBatCapacityLeft - exBatCapacityLeft);
+
+  // запас хода
   LCD.print(0, 53, 1, "RemDist");
+  int remDist = (inBatCapacityLeft + exBatCapacityLeft) * currentMileage / (startBatCapacityLeft - inBatCapacityLeft - exBatCapacityLeft);
+  LCD.print(64, 53, 1, (remDist % 10000) / 1000);
+  LCD.print(70, 53, 1, (remDist % 1000) / 100);
+  LCD.print(75, 53, 1, ",");
+  LCD.print(79, 53, 1, (remDist % 100) / 10);
+  LCD.print(85, 53, 1, remDist % 10);
+  LCD.print(91, 53, 1, "км");
+
+  // общий пробег самоката
   LCD.print(0, 61, 1, "Total");
+  if (totalMileage > 9999999) {
+    LCD.print(40, 61, 1, totalMileage / 1000);
+  }
+  else if (totalMileage > 999999) {
+    LCD.print(46, 61, 1, totalMileage / 1000);
+  }
+  else if (totalMileage > 99999) {
+    LCD.print(52, 61, 1, totalMileage / 1000);
+  }
+  else if (totalMileage > 9999) {
+    LCD.print(58, 61, 1, totalMileage / 1000);
+  }
+  else {
+    LCD.print(64, 61, 1, totalMileage / 1000);
+  }
+  LCD.print(69, 61, 1, ",");
+  LCD.print(73, 61, 1, totalMileage % 1000);
+  LCD.print(91, 61, 1, "км");
   LCD.Update();
 }
+
+
+
+
+
 
 
 void Display4() {                    // информация о батареях

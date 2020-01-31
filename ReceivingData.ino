@@ -156,9 +156,9 @@ void Query() {                                         // процедура о�
           break;
       }
       timerReq = millis();
-      UCSR1B &= ~_BV(RXEN1);            // здесь поменять на UCSR0B &= ~_BV(RXEN0);
+      UCSR0B &= ~_BV(RXEN0);            // здесь поменять на UCSR0B &= ~_BV(RXEN0);
       NINEBOT_PORT.write(REQ, 10);
-      UCSR1B |= _BV(RXEN1);            // здесь поменять на UCSR0B |= _BV(RXEN0);
+      UCSR0B |= _BV(RXEN0);            // здесь поменять на UCSR0B |= _BV(RXEN0);
     }
   }
 }

@@ -147,7 +147,7 @@ void Query() {                                         // процедура о�
               break;
             case 1:
               for (int i = 0; i < 10; i++) {
-                REQ[i] = pgm_read_byte(&REQ_INCELL[i]);
+                REQ[i] = pgm_read_byte(&REQ_EXCELL[i]);
               }
               reqCounter++;
               break;
@@ -156,12 +156,15 @@ void Query() {                                         // процедура о�
           break;
       }
       timerReq = millis();
-      UCSR0B &= ~_BV(RXEN0);            // здесь поменять на UCSR0B &= ~_BV(RXEN0);
+      UCSR1B &= ~_BV(RXEN1);            // здесь поменять на UCSR0B &= ~_BV(RXEN0);
       NINEBOT_PORT.write(REQ, 10);
-      UCSR0B |= _BV(RXEN0);            // здесь поменять на UCSR0B |= _BV(RXEN0);
+      UCSR1B |= _BV(RXEN1);            // здесь поменять на UCSR0B |= _BV(RXEN0);
     }
   }
 }
+
+
+
 
 
 void Unpack() {                 // процедура распаковки пакета

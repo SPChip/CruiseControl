@@ -32,7 +32,27 @@ void Display1() {
     LCD.drawCircle(60, 1, 1, 1);
   }
   //часы
-  LCD.print(0, 0, 1, "12:43");
+
+  if (RTC.getHours() < 10) {
+    LCD.print(0, 0, 1, " ");    // часы
+    LCD.print(6, 0, 1, RTC.getHours());
+  }
+  else {
+    LCD.print(0, 0, 1, RTC.getHours());
+  }
+
+  LCD.print(12, 0, 1, ":");
+
+  if (RTC.getMinutes() < 10) {
+    LCD.print(18, 0, 1, "0");    // минуты
+    LCD.print(24, 0, 1, RTC.getMinutes());
+  }
+  else {
+    LCD.print(18, 0, 1, RTC.getMinutes());
+  }
+
+
+
   //расход
   LCD.simb16x32(0, 15, 1, 0);
   LCD.simb16x32(18, 15, 1, 3);

@@ -1,3 +1,49 @@
+void Display() {
+  if (LCD_TIMER.isReady() || BTN1.isClick()) {
+    switch (dysplayMode) {
+      case 0:
+        break;
+      case 1:
+        Display1();
+        break;
+      case 2:
+        Display2();
+        break;
+      case 3:
+        Display3();
+        break;
+      case 4:
+        Display4();
+        break;
+      case 5:
+        Display5();
+        break;
+      case 6:
+        Display6();
+        break;
+    }
+  }
+}
+
+void Display2() {
+  LCD.Clear_LCD();
+  LCD.print(10, 0, 1, "Cruise Control");
+  if (cruiseControlFlag) {
+    LCD.print(0, 10, 1, "ON");
+  }
+  else {
+    LCD.print(0, 10, 1, "OFF");
+  }
+  LCD.print(0, 20, 1, "Pre sp");
+  LCD.print(42, 20, 1, presetSpeed);
+  LCD.print(0, 30, 1, "Cur sp");
+  LCD.print(42, 30, 1, currentSpeed);
+  LCD.Update();
+}
+
+
+
+
 void Display1() {
   LCD.Clear_LCD();
   // значок зарядки

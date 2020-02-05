@@ -2,14 +2,7 @@ void Settings() {
   byte setting = 1;                             // номер текущей настройки
   byte levelMenu = 1;                           // подпараметры в меню
   bool inputSettings = 0;                       // флаг выбора установки
-<<<<<<< HEAD
-  unsigned long timerBlink;                     // таймер для мигания
-  unsigned long timerBlinkCursor; 
   bool flagBlink = 1;                           // флаг для мигания
-   
-=======
-  bool flagBlink = 1;                           // флаг для мигания
->>>>>>> master
   LCD.Clear_LCD();                              // очищаем дисплей
   while (!BTN1.isHolded()) {                    // пока не будет удержана кнопка 1
     BTN1.tick();                                // постоянно проверяем все три кнопки
@@ -22,15 +15,9 @@ void Settings() {
         setting = 6;
       }
     }
-<<<<<<< HEAD
-    if (inputSettings == 0 && BTN3.isClick()) {
-      LCD.Clear_LCD();
-      setting++;
-=======
     if (inputSettings == 0 && BTN3.isClick()) {  // если не выбрана установка и нажата кнопка 2
       LCD.Clear_LCD();
       setting++;                                 // переходим к следующей настройке
->>>>>>> master
       if (setting > 6) {
         setting = 1;
       }
@@ -59,10 +46,7 @@ void Settings() {
             levelMenu++;
             if (levelMenu > 3) {
               inputSettings = 0;
-<<<<<<< HEAD
-=======
               levelMenu = 1;
->>>>>>> master
             }
           }
           switch (levelMenu) {
@@ -108,11 +92,6 @@ void Settings() {
                 RTC.setTime(sec, RTC.getMinutes(), RTC.getHours(), RTC.getDate(), RTC.getMonth(), RTC.getYear());
               }
               break;
-<<<<<<< HEAD
-
-          }
-
-=======
           }
           break;
         case 3:                                             //пассивный режим
@@ -188,91 +167,10 @@ void Settings() {
 
 
           break;
->>>>>>> master
       }
     }
 
     // отрисовка
-<<<<<<< HEAD
-    //заголовок
-    LCD.print(20, 0, 1, "Settings");
-    LCD.drawFastHLine(0, 8, 96, 1);
-    // курсор
-    //if (inputSettings == 0) {
-      LCD.print(0, setting * 10 + 1, 1, ">");
-    /*}
-    else {
-      if (millis() - timerBlinkCursor > 500 ) {
-        if (flagBlink) {
-          LCD.print(0, setting * 10 + 1, 1, " ");
-        }
-        else {
-          LCD.print(0, setting * 10 + 1, 1, ">");
-        }
-        timerBlinkCursor = millis();
-       
-      }
-    }*/
-
-    //подсветка
-    LCD.print(6, 11, 1, "Backlight");
-
-    if (inputSettings == 0) {
-      if (BL_Lcd) {
-        LCD.print(85, 11, 1, "ON");
-      }
-      else {
-        LCD.print(79, 11, 1, "OFF");
-      }
-    }
-    else if (setting == 1) {
-      if (BL_Lcd) {
-        if (millis() - timerBlink > 500 ) {
-          if (flagBlink) {
-            LCD.print(85, 11, 1, "  ");
-          }
-          else {
-            LCD.print(85, 11, 1, "ON");
-          }
-          timerBlink = millis(); 
-          flagBlink = !flagBlink;
-          
-        }
-      }
-      else{
-        if (millis() - timerBlink > 500 ) {
-          if (flagBlink) {
-            LCD.print(79, 11, 1, "   ");
-          }
-          else {
-            LCD.print(79, 11, 1, "OFF");
-          }
-          timerBlink = millis(); 
-          flagBlink = !flagBlink;
-          
-        }
-      }
-    }
-    else {
-      if (BL_Lcd) {
-        LCD.print(85, 11, 1, "ON");
-      }
-      else {
-        LCD.print(79, 11, 1, "OFF");
-      }
-    }
-    
-
-
-
-    //часы
-    LCD.print(6, 21, 1, "Time");
-    LCD.print(49, 21, 1, RTC.getHours());
-    LCD.print(61, 21, 1, ":");
-    LCD.print(67, 21, 1, RTC.getMinutes());
-    LCD.print(79, 21, 1, ":");
-    LCD.print(85, 21, 1, RTC.getSeconds());
-=======
     // заголовок
     LCD.print(20, 0, 1, "Settings");
     LCD.drawFastHLine(0, 8, 96, 1);
@@ -520,7 +418,6 @@ void Settings() {
 
 
 
->>>>>>> master
 
 
 

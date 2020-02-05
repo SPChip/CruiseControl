@@ -322,7 +322,7 @@ void ReceivingData() {                                                //проц
         }
         break;                                                     // выходим из case и возвращемся в начало
       case 3:                                                      // если находимся в состоянии 3
-        unsigned int cs, _cs;
+        unsigned int cs=0, _cs=0;
         for (int i = 2; i < curs - 2; i++) {                       // считаем контрольную сумму
           cs = cs + data[i];
         }
